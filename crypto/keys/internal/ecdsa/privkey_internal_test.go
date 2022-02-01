@@ -4,10 +4,15 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/sha256"
+<<<<<<< HEAD
 	"math/big"
 	"testing"
 
+=======
+>>>>>>> fred/allow_multiple_futures_for_sim
 	"github.com/tendermint/tendermint/crypto"
+	"math/big"
+	"testing"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -81,7 +86,11 @@ func (suite *SKSuite) TestSign() {
 	// leave r untouched!
 	high_s := new(big.Int).Mod(new(big.Int).Neg(low_s), elliptic.P256().Params().N)
 
+<<<<<<< HEAD
 	require.False(suite.pk.VerifySignature(msg, signatureRaw(r, high_s)))
+=======
+	require.False(suite.pk.VerifySignature(msg, signatureRaw(r,high_s)))
+>>>>>>> fred/allow_multiple_futures_for_sim
 
 	// Valid signature using low_s, but too long
 	sigCpy = make([]byte, len(sig)+2)

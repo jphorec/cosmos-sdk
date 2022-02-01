@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 //go:build norace
 // +build norace
 
+=======
+>>>>>>> fred/allow_multiple_futures_for_sim
 package testutil
 
 import (

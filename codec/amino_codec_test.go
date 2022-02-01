@@ -12,7 +12,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+<<<<<<< HEAD
 	"github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
+=======
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
+>>>>>>> fred/allow_multiple_futures_for_sim
 )
 
 func createTestCodec() *codec.LegacyAmino {

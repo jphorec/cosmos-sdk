@@ -1,8 +1,11 @@
 package cachekv
 
 import (
+<<<<<<< HEAD
 	"bytes"
 
+=======
+>>>>>>> fred/allow_multiple_futures_for_sim
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/store/types"
@@ -13,6 +16,7 @@ import (
 // Implements Iterator.
 type memIterator struct {
 	types.Iterator
+<<<<<<< HEAD
 
 	lastKey []byte
 	deleted map[string]struct{}
@@ -38,10 +42,41 @@ func newMemIterator(start, end []byte, items *dbm.MemDB, deleted map[string]stru
 		lastKey: nil,
 		deleted: deleted,
 	}
+=======
+
+	deleted map[string]struct{}
+}
+
+func newMemIterator(start, end []byte, items *dbm.MemDB, deleted map[string]struct{}, ascending bool) *memIterator {
+	var iter types.Iterator
+	var err error
+
+	if ascending {
+		iter, err = items.Iterator(start, end)
+	} else {
+		iter, err = items.ReverseIterator(start, end)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	newDeleted := make(map[string]struct{})
+	for k, v := range deleted {
+		newDeleted[k] = v
+	}
+
+	return &memIterator{
+		Iterator: iter,
+
+		deleted: newDeleted,
+	}
+>>>>>>> fred/allow_multiple_futures_for_sim
 }
 
 func (mi *memIterator) Value() []byte {
 	key := mi.Iterator.Key()
+<<<<<<< HEAD
 	// We need to handle the case where deleted is modified and includes our current key
 	// We handle this by maintaining a lastKey object in the iterator.
 	// If the current key is the same as the last key (and last key is not nil / the start)
@@ -52,5 +87,10 @@ func (mi *memIterator) Value() []byte {
 		return nil
 	}
 	mi.lastKey = key
+=======
+	if _, ok := mi.deleted[string(key)]; ok {
+		return nil
+	}
+>>>>>>> fred/allow_multiple_futures_for_sim
 	return mi.Iterator.Value()
 }

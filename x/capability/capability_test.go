@@ -29,7 +29,11 @@ type CapabilityTestSuite struct {
 
 func (suite *CapabilityTestSuite) SetupTest() {
 	checkTx := false
+<<<<<<< HEAD
 	app := simapp.Setup(checkTx)
+=======
+	app := simapp.Setup(suite.T(), checkTx)
+>>>>>>> fred/allow_multiple_futures_for_sim
 	cdc := app.AppCodec()
 
 	// create new keeper so we can define custom scoping before init and seal

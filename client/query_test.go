@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 //go:build norace
+=======
+>>>>>>> fred/allow_multiple_futures_for_sim
 // +build norace
 
 package client_test

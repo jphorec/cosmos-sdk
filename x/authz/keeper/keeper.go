@@ -8,22 +8,31 @@ import (
 
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/x/auth/middleware"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 )
 
 type Keeper struct {
-	storeKey sdk.StoreKey
+	storeKey storetypes.StoreKey
 	cdc      codec.BinaryCodec
+<<<<<<< HEAD
 	router   baseapp.IMsgServiceRouter
 }
 
 // NewKeeper constructs a message authorization Keeper
 func NewKeeper(storeKey sdk.StoreKey, cdc codec.BinaryCodec, router baseapp.IMsgServiceRouter) Keeper {
+=======
+	router   *middleware.MsgServiceRouter
+}
+
+// NewKeeper constructs a message authorization Keeper
+func NewKeeper(storeKey storetypes.StoreKey, cdc codec.BinaryCodec, router *middleware.MsgServiceRouter) Keeper {
+>>>>>>> fred/allow_multiple_futures_for_sim
 	return Keeper{
 		storeKey: storeKey,
 		cdc:      cdc,
@@ -80,6 +89,7 @@ func (k Keeper) DispatchActions(ctx sdk.Context, grantee sdk.AccAddress, msgs []
 			return nil, sdkerrors.ErrInvalidRequest.Wrap("authorization can be given to msg with only one signer")
 		}
 		granter := signers[0]
+
 		// if granter != grantee then check authorization.Accept, otherwise we implicitly accept.
 		if !granter.Equals(grantee) {
 			authorization, _ := k.GetCleanAuthorization(ctx, grantee, granter, sdk.MsgTypeURL(msg))

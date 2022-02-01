@@ -5,7 +5,11 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
+<<<<<<< HEAD
 	"github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
+=======
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
+>>>>>>> fred/allow_multiple_futures_for_sim
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 )
 

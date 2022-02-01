@@ -15,10 +15,15 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func Test_runExportCmd(t *testing.T) {
+<<<<<<< HEAD
+=======
+	cdc := simapp.MakeTestEncodingConfig().Codec
+>>>>>>> fred/allow_multiple_futures_for_sim
 	testCases := []struct {
 		name           string
 		keyringBackend string
@@ -85,20 +90,33 @@ func Test_runExportCmd(t *testing.T) {
 			mockInBuf := bufio.NewReader(mockIn)
 
 			// create a key
+<<<<<<< HEAD
 			kb, err := keyring.New(sdk.KeyringServiceName(), tc.keyringBackend, kbHome, bufio.NewReader(mockInBuf))
+=======
+			kb, err := keyring.New(sdk.KeyringServiceName(), tc.keyringBackend, kbHome, bufio.NewReader(mockInBuf), cdc)
+>>>>>>> fred/allow_multiple_futures_for_sim
 			require.NoError(t, err)
 			t.Cleanup(func() {
 				kb.Delete("keyname1") // nolint:errcheck
 			})
 
 			path := sdk.GetConfig().GetFullBIP44Path()
+<<<<<<< HEAD
 			_, err = kb.NewAccount("keyname1", testdata.TestMnemonic, "", path, hd.Secp256k1)
+=======
+			_, err = kb.NewAccount("keyname1", testutil.TestMnemonic, "", path, hd.Secp256k1)
+>>>>>>> fred/allow_multiple_futures_for_sim
 			require.NoError(t, err)
 
 			clientCtx := client.Context{}.
 				WithKeyringDir(kbHome).
 				WithKeyring(kb).
+<<<<<<< HEAD
 				WithInput(mockInBuf)
+=======
+				WithInput(mockInBuf).
+				WithCodec(cdc)
+>>>>>>> fred/allow_multiple_futures_for_sim
 			ctx := context.WithValue(context.Background(), client.ClientContextKey, &clientCtx)
 
 			err = cmd.ExecuteContext(ctx)

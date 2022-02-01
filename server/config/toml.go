@@ -68,7 +68,7 @@ inter-block-cache = {{ .BaseConfig.InterBlockCache }}
 #
 # Example:
 # ["message.sender", "message.recipient"]
-index-events = {{ .BaseConfig.IndexEvents }}
+index-events = [{{ range .BaseConfig.IndexEvents }}{{ printf "%q, " . }}{{end}}]
 
 # IavlCacheSize set the size of the iavl tree cache. 
 # Default cache size is 50mb.

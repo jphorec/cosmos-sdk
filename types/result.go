@@ -7,6 +7,12 @@ import (
 	"strings"
 
 	"github.com/gogo/protobuf/proto"
+<<<<<<< HEAD
+=======
+
+	"sigs.k8s.io/yaml"
+
+>>>>>>> fred/allow_multiple_futures_for_sim
 	abci "github.com/tendermint/tendermint/abci/types"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 

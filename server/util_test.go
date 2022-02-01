@@ -14,6 +14,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
+<<<<<<< HEAD
+=======
+	"github.com/cosmos/cosmos-sdk/server/config"
+	"github.com/cosmos/cosmos-sdk/simapp"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+>>>>>>> fred/allow_multiple_futures_for_sim
 )
 
 var cancelledInPreRun = errors.New("Cancelled in prerun")
@@ -400,3 +407,37 @@ func TestInterceptConfigsWithBadPermissions(t *testing.T) {
 		t.Fatalf("Failed to catch permissions error, got: [%T] %v", err, err)
 	}
 }
+<<<<<<< HEAD
+=======
+
+func TestEmptyMinGasPrices(t *testing.T) {
+	tempDir := t.TempDir()
+	err := os.Mkdir(filepath.Join(tempDir, "config"), os.ModePerm)
+	require.NoError(t, err)
+	encCfg := simapp.MakeTestEncodingConfig()
+
+	// Run InitCmd to create necessary config files.
+	clientCtx := client.Context{}.WithHomeDir(tempDir).WithCodec(encCfg.Codec)
+	serverCtx := server.NewDefaultContext()
+	ctx := context.WithValue(context.Background(), server.ServerContextKey, serverCtx)
+	ctx = context.WithValue(ctx, client.ClientContextKey, &clientCtx)
+	cmd := genutilcli.InitCmd(simapp.ModuleBasics, tempDir)
+	cmd.SetArgs([]string{"appnode-test"})
+	err = cmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+
+	// Modify app.toml.
+	appCfgTempFilePath := filepath.Join(tempDir, "config", "app.toml")
+	appConf := config.DefaultConfig()
+	appConf.BaseConfig.MinGasPrices = ""
+	config.WriteConfigFile(appCfgTempFilePath, appConf)
+
+	// Run StartCmd.
+	cmd = server.StartCmd(nil, tempDir)
+	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
+		return server.InterceptConfigsPreRunHandler(cmd, "", nil)
+	}
+	err = cmd.ExecuteContext(ctx)
+	require.Errorf(t, err, sdkerrors.ErrAppConfig.Error())
+}
+>>>>>>> fred/allow_multiple_futures_for_sim

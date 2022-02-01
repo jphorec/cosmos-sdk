@@ -55,6 +55,7 @@ type Store struct {
 	lazyLoading    bool
 	pruneHeights   []int64
 	initialVersion int64
+	removalMap     map[types.StoreKey]bool
 
 	traceWriter  io.Writer
 	traceContext types.TraceContext
@@ -75,6 +76,7 @@ var (
 // LoadVersion must be called.
 func NewStore(db dbm.DB) *Store {
 	return &Store{
+<<<<<<< HEAD
 		db:            db,
 		pruningOpts:   types.PruneNothing,
 		iavlCacheSize: iavl.DefaultIAVLCacheSize,
@@ -83,6 +85,16 @@ func NewStore(db dbm.DB) *Store {
 		keysByName:    make(map[string]types.StoreKey),
 		pruneHeights:  make([]int64, 0),
 		listeners:     make(map[types.StoreKey][]types.WriteListener),
+=======
+		db:           db,
+		pruningOpts:  types.PruneNothing,
+		storesParams: make(map[types.StoreKey]storeParams),
+		stores:       make(map[types.StoreKey]types.CommitKVStore),
+		keysByName:   make(map[string]types.StoreKey),
+		pruneHeights: make([]int64, 0),
+		listeners:    make(map[types.StoreKey][]types.WriteListener),
+		removalMap:   make(map[types.StoreKey]bool),
+>>>>>>> fred/allow_multiple_futures_for_sim
 	}
 }
 
@@ -231,9 +243,10 @@ func (rs *Store) loadVersion(ver int64, upgrades *types.StoreUpgrades) error {
 			if err := deleteKVStore(store.(types.KVStore)); err != nil {
 				return errors.Wrapf(err, "failed to delete store %s", key.Name())
 			}
+			rs.removalMap[key] = true
 		} else if oldName := upgrades.RenamedFrom(key.Name()); oldName != "" {
 			// handle renames specially
-			// make an unregistered key to satify loadCommitStore params
+			// make an unregistered key to satisfy loadCommitStore params
 			oldKey := types.NewKVStoreKey(oldName)
 			oldParams := storeParams
 			oldParams.key = oldKey
@@ -248,6 +261,11 @@ func (rs *Store) loadVersion(ver int64, upgrades *types.StoreUpgrades) error {
 			if err := moveKVStoreData(oldStore.(types.KVStore), store.(types.KVStore)); err != nil {
 				return errors.Wrapf(err, "failed to move store %s -> %s", oldName, key.Name())
 			}
+
+			// add the old key so its deletion is committed
+			newStores[oldKey] = oldStore
+			// this will ensure it's not perpetually stored in commitInfo
+			rs.removalMap[oldKey] = true
 		}
 	}
 
@@ -382,8 +400,19 @@ func (rs *Store) Commit() types.CommitID {
 		previousHeight = rs.lastCommitInfo.GetVersion()
 		version = previousHeight + 1
 	}
+	rs.lastCommitInfo = commitStores(version, rs.stores, rs.removalMap)
 
-	rs.lastCommitInfo = commitStores(version, rs.stores)
+	// remove remnants of removed stores
+	for sk := range rs.removalMap {
+		if _, ok := rs.stores[sk]; ok {
+			delete(rs.stores, sk)
+			delete(rs.storesParams, sk)
+			delete(rs.keysByName, sk.Name())
+		}
+	}
+
+	// reset the removalMap
+	rs.removalMap = make(map[types.StoreKey]bool)
 
 	// Determine if pruneHeight height needs to be added to the list of heights to
 	// be pruned, where pruneHeight = (commitHeight - 1) - KeepRecent.
@@ -550,17 +579,17 @@ func (rs *Store) Query(req abci.RequestQuery) abci.ResponseQuery {
 	path := req.Path
 	storeName, subpath, err := parsePath(path)
 	if err != nil {
-		return sdkerrors.QueryResult(err)
+		return sdkerrors.QueryResult(err, false)
 	}
 
 	store := rs.getStoreByName(storeName)
 	if store == nil {
-		return sdkerrors.QueryResult(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "no such store: %s", storeName))
+		return sdkerrors.QueryResult(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "no such store: %s", storeName), false)
 	}
 
 	queryable, ok := store.(types.Queryable)
 	if !ok {
-		return sdkerrors.QueryResult(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "store %s (type %T) doesn't support queries", storeName, store))
+		return sdkerrors.QueryResult(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "store %s (type %T) doesn't support queries", storeName, store), false)
 	}
 
 	// trim the path and make the query
@@ -572,7 +601,7 @@ func (rs *Store) Query(req abci.RequestQuery) abci.ResponseQuery {
 	}
 
 	if res.ProofOps == nil || len(res.ProofOps.Ops) == 0 {
-		return sdkerrors.QueryResult(sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "proof is unexpectedly empty; ensure height has not been pruned"))
+		return sdkerrors.QueryResult(sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "proof is unexpectedly empty; ensure height has not been pruned"), false)
 	}
 
 	// If the request's height is the latest height we've committed, then utilize
@@ -585,7 +614,7 @@ func (rs *Store) Query(req abci.RequestQuery) abci.ResponseQuery {
 	} else {
 		commitInfo, err = getCommitInfo(rs.db, res.Height)
 		if err != nil {
-			return sdkerrors.QueryResult(err)
+			return sdkerrors.QueryResult(err, false)
 		}
 	}
 
@@ -607,7 +636,7 @@ func (rs *Store) SetInitialVersion(version int64) error {
 			// If the store is wrapped with an inter-block cache, we must first unwrap
 			// it to get the underlying IAVL store.
 			store = rs.GetCommitKVStore(key)
-			store.(*iavl.Store).SetInitialVersion(version)
+			store.(types.StoreWithInitialVersion).SetInitialVersion(version)
 		}
 	}
 
@@ -965,7 +994,7 @@ func getLatestVersion(db dbm.DB) int64 {
 }
 
 // Commits each store and returns a new commitInfo.
-func commitStores(version int64, storeMap map[types.StoreKey]types.CommitKVStore) *types.CommitInfo {
+func commitStores(version int64, storeMap map[types.StoreKey]types.CommitKVStore, removalMap map[types.StoreKey]bool) *types.CommitInfo {
 	storeInfos := make([]types.StoreInfo, 0, len(storeMap))
 
 	for key, store := range storeMap {
@@ -975,10 +1004,12 @@ func commitStores(version int64, storeMap map[types.StoreKey]types.CommitKVStore
 			continue
 		}
 
-		si := types.StoreInfo{}
-		si.Name = key.Name()
-		si.CommitId = commitID
-		storeInfos = append(storeInfos, si)
+		if !removalMap[key] {
+			si := types.StoreInfo{}
+			si.Name = key.Name()
+			si.CommitId = commitID
+			storeInfos = append(storeInfos, si)
+		}
 	}
 
 	return &types.CommitInfo{

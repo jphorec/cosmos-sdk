@@ -19,23 +19,15 @@ If you want to open a PR in Cosmos SDK to update the documentation, please follo
 
 ## Docs Build Workflow
 
-The documentation for the Cosmos SDK is hosted at https://cosmos.network/docs/
-
-built from the files in this (`/docs`) directory for
-[master](https://github.com/cosmos/cosmos-sdk/tree/master/docs).
+The documentation for Cosmos SDK is hosted at https://docs.cosmos.network/ and built from the files in the `/docs` directory.
 
 ### How It Works
 
-There is a CircleCI job listening for changes in the `/docs` directory, on
-the `master` branch. Any updates to files in this directory
-on that branch will automatically trigger a website deployment. Under the hood,
-the private website repository has a `make build-docs` target consumed by a CircleCI job in that repo.
+There is a CircleCI job listening for changes in the `/docs` directory for the `master` branch and each supported version tag (`v0.39` and `v0.42`). Any updates to files in the `/docs` directory will automatically trigger a website deployment. Under the hood, the private website repository has a `make build-docs` target consumed by a CircleCI job within that repository.
 
 ## README
 
-The [README.md](./README.md) is also the landing page for the documentation
-on the website. During the Jenkins build, the current commit is added to the bottom
-of the README.
+The [README.md](./README.md) is both the README for the repository and the configuration for the layout of the landing page.
 
 ## Config.js
 

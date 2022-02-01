@@ -3,7 +3,10 @@ package keys
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
 	"io/ioutil"
+=======
+>>>>>>> fred/allow_multiple_futures_for_sim
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,11 +16,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func Test_runImportCmd(t *testing.T) {
+<<<<<<< HEAD
+=======
+	cdc := simapp.MakeTestEncodingConfig().Codec
+>>>>>>> fred/allow_multiple_futures_for_sim
 	testCases := []struct {
 		name           string
 		keyringBackend string
@@ -80,22 +88,38 @@ HbP+c6JmeJy9JXe2rbbF1QtCX1gLqGcDQPBXiCtFvP7/8wTZtVOPj8vREzhZ9ElO
 
 			// Now add a temporary keybase
 			kbHome := t.TempDir()
+<<<<<<< HEAD
 			kb, err := keyring.New(sdk.KeyringServiceName(), tc.keyringBackend, kbHome, nil)
+=======
+			kb, err := keyring.New(sdk.KeyringServiceName(), tc.keyringBackend, kbHome, nil, cdc)
+			require.NoError(t, err)
+>>>>>>> fred/allow_multiple_futures_for_sim
 
 			clientCtx := client.Context{}.
 				WithKeyringDir(kbHome).
 				WithKeyring(kb).
+<<<<<<< HEAD
 				WithInput(mockIn)
 			ctx := context.WithValue(context.Background(), client.ClientContextKey, &clientCtx)
 
 			require.NoError(t, err)
+=======
+				WithInput(mockIn).
+				WithCodec(cdc)
+			ctx := context.WithValue(context.Background(), client.ClientContextKey, &clientCtx)
+
+>>>>>>> fred/allow_multiple_futures_for_sim
 			t.Cleanup(func() {
 				kb.Delete("keyname1") // nolint:errcheck
 			})
 
 			keyfile := filepath.Join(kbHome, "key.asc")
 
+<<<<<<< HEAD
 			require.NoError(t, ioutil.WriteFile(keyfile, []byte(armoredKey), 0644))
+=======
+			require.NoError(t, os.WriteFile(keyfile, []byte(armoredKey), 0644))
+>>>>>>> fred/allow_multiple_futures_for_sim
 
 			defer func() {
 				_ = os.RemoveAll(kbHome)

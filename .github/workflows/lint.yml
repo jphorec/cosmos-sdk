@@ -14,7 +14,11 @@ jobs:
     steps:
       - uses: actions/setup-go@v2.1.4
         with:
+<<<<<<< HEAD
           go-version: 1.16
+=======
+          go-version: 1.17
+>>>>>>> fred/allow_multiple_futures_for_sim
       - uses: technote-space/get-diff-action@v5
         id: git_diff
         with:
@@ -22,6 +26,15 @@ jobs:
             **/**.go
             go.mod
             go.sum
+<<<<<<< HEAD
       - name: run go linters
         run: make lint-go
+=======
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          args: --out-format=tab
+          skip-go-installation: true
+>>>>>>> fred/allow_multiple_futures_for_sim
         if: env.GIT_DIFF

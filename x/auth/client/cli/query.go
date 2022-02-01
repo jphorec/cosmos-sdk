@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -12,7 +13,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
+<<<<<<< HEAD
 	"github.com/cosmos/cosmos-sdk/types/rest"
+=======
+>>>>>>> fred/allow_multiple_futures_for_sim
 	"github.com/cosmos/cosmos-sdk/version"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -43,6 +47,7 @@ func GetQueryCmd() *cobra.Command {
 		GetAccountCmd(),
 		GetAccountsCmd(),
 		QueryParamsCmd(),
+		QueryModuleAccountsCmd(),
 	)
 
 	return cmd
@@ -143,6 +148,33 @@ func GetAccountsCmd() *cobra.Command {
 	return cmd
 }
 
+// QueryAllModuleAccountsCmd returns a list of all the existing module accounts with their account information and permissions
+func QueryModuleAccountsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "module-accounts",
+		Short: "Query all module accounts",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.ModuleAccounts(context.Background(), &types.QueryModuleAccountsRequest{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
 // QueryTxsByEventsCmd returns a command to search through transactions by events.
 func QueryTxsByEventsCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -206,8 +238,8 @@ $ %s query txs --%s 'message.sender=cosmos1...&message.action=withdraw_delegator
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-	cmd.Flags().Int(flags.FlagPage, rest.DefaultPage, "Query a specific page of paginated results")
-	cmd.Flags().Int(flags.FlagLimit, rest.DefaultLimit, "Query number of transactions results per page returned")
+	cmd.Flags().Int(flags.FlagPage, query.DefaultPage, "Query a specific page of paginated results")
+	cmd.Flags().Int(flags.FlagLimit, query.DefaultLimit, "Query number of transactions results per page returned")
 	cmd.Flags().String(flagEvents, "", fmt.Sprintf("list of transaction events in the form of %s", eventFormat))
 	cmd.MarkFlagRequired(flagEvents)
 
@@ -243,6 +275,7 @@ $ %s query tx --%s=%s <sig1_base64>,<sig2_base64...>
 					if args[0] == "" {
 						return fmt.Errorf("argument should be a tx hash")
 					}
+<<<<<<< HEAD
 
 					// If hash is given, then query the tx by hash.
 					output, err := authtx.QueryTx(clientCtx, args[0])
@@ -250,6 +283,15 @@ $ %s query tx --%s=%s <sig1_base64>,<sig2_base64...>
 						return err
 					}
 
+=======
+
+					// If hash is given, then query the tx by hash.
+					output, err := authtx.QueryTx(clientCtx, args[0])
+					if err != nil {
+						return err
+					}
+
+>>>>>>> fred/allow_multiple_futures_for_sim
 					if output.Empty() {
 						return fmt.Errorf("no transaction found with hash %s", args[0])
 					}
@@ -267,7 +309,11 @@ $ %s query tx --%s=%s <sig1_base64>,<sig2_base64...>
 						tmEvents[i] = fmt.Sprintf("%s.%s='%s'", sdk.EventTypeTx, sdk.AttributeKeySignature, sig)
 					}
 
+<<<<<<< HEAD
 					txs, err := authtx.QueryTxsByEvents(clientCtx, tmEvents, rest.DefaultPage, query.DefaultLimit, "")
+=======
+					txs, err := authtx.QueryTxsByEvents(clientCtx, tmEvents, query.DefaultPage, query.DefaultLimit, "")
+>>>>>>> fred/allow_multiple_futures_for_sim
 					if err != nil {
 						return err
 					}
@@ -290,7 +336,11 @@ $ %s query tx --%s=%s <sig1_base64>,<sig2_base64...>
 					tmEvents := []string{
 						fmt.Sprintf("%s.%s='%s'", sdk.EventTypeTx, sdk.AttributeKeyAccountSequence, args[0]),
 					}
+<<<<<<< HEAD
 					txs, err := authtx.QueryTxsByEvents(clientCtx, tmEvents, rest.DefaultPage, query.DefaultLimit, "")
+=======
+					txs, err := authtx.QueryTxsByEvents(clientCtx, tmEvents, query.DefaultPage, query.DefaultLimit, "")
+>>>>>>> fred/allow_multiple_futures_for_sim
 					if err != nil {
 						return err
 					}

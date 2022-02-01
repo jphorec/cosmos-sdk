@@ -3,6 +3,9 @@ package cmd_test
 import (
 	"context"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -41,6 +44,7 @@ func TestAddGenesisAccountCmd(t *testing.T) {
 			denom:       "1000atom",
 			withKeyring: false,
 			expectErr:   true,
+<<<<<<< HEAD
 		},
 		{
 			name:        "valid address",
@@ -53,10 +57,27 @@ func TestAddGenesisAccountCmd(t *testing.T) {
 			name:        "multiple denoms",
 			addr:        addr1.String(),
 			denom:       "1000atom, 2000stake",
+=======
+		},
+		{
+			name:        "valid address",
+			addr:        addr1.String(),
+			denom:       "1000atom",
+>>>>>>> fred/allow_multiple_futures_for_sim
 			withKeyring: false,
 			expectErr:   false,
 		},
 		{
+<<<<<<< HEAD
+=======
+			name:        "multiple denoms",
+			addr:        addr1.String(),
+			denom:       "1000atom, 2000stake",
+			withKeyring: false,
+			expectErr:   false,
+		},
+		{
+>>>>>>> fred/allow_multiple_futures_for_sim
 			name:        "with keyring",
 			addr:        "ser",
 			denom:       "1000atom",
@@ -73,7 +94,7 @@ func TestAddGenesisAccountCmd(t *testing.T) {
 			cfg, err := genutiltest.CreateDefaultTendermintConfig(home)
 			require.NoError(t, err)
 
-			appCodec := simapp.MakeTestEncodingConfig().Marshaler
+			appCodec := simapp.MakeTestEncodingConfig().Codec
 			err = genutiltest.ExecInitCmd(testMbm, home, appCodec)
 			require.NoError(t, err)
 
@@ -82,7 +103,11 @@ func TestAddGenesisAccountCmd(t *testing.T) {
 
 			if tc.withKeyring {
 				path := hd.CreateHDPath(118, 0, 0).String()
+<<<<<<< HEAD
 				kr, err := keyring.New(sdk.KeyringServiceName(), keyring.BackendMemory, home, nil)
+=======
+				kr, err := keyring.New(sdk.KeyringServiceName(), keyring.BackendMemory, home, nil, appCodec)
+>>>>>>> fred/allow_multiple_futures_for_sim
 				require.NoError(t, err)
 				_, _, err = kr.NewMnemonic(tc.addr, keyring.English, path, keyring.DefaultBIP39Passphrase, hd.Secp256k1)
 				require.NoError(t, err)

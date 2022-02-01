@@ -45,6 +45,7 @@ func benchmarkBlankParentIteratorNext(b *testing.B, keysize int) {
 func benchmarkBlankParentAppend(b *testing.B, keysize int) {
 	mem := dbadapter.Store{DB: dbm.NewMemDB()}
 	kvstore := cachekv.NewStore(mem)
+<<<<<<< HEAD
 
 	// Use a singleton for value, to not waste time computing it
 	value := randSlice(32)
@@ -57,6 +58,20 @@ func benchmarkBlankParentAppend(b *testing.B, keysize int) {
 	b.ReportAllocs()
 	b.ResetTimer()
 
+=======
+
+	// Use a singleton for value, to not waste time computing it
+	value := randSlice(32)
+	// Use simple values for keys, pick a random start,
+	// and take next b.N keys sequentially after.
+	startKey := randSlice(32)
+
+	keys := generateSequentialKeys(startKey, b.N)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+>>>>>>> fred/allow_multiple_futures_for_sim
 	for _, k := range keys {
 		kvstore.Set(k, value)
 	}
@@ -71,6 +86,7 @@ func benchmarkRandomSet(b *testing.B, keysize int) {
 	// Use a singleton for value, to not waste time computing it
 	value := randSlice(defaultValueSizeBz)
 	keys := generateRandomKeys(keysize, b.N)
+<<<<<<< HEAD
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -127,6 +143,17 @@ func benchmarkIteratorOnParentWithManyDeletes(b *testing.B, numDeletes int) {
 	}
 }
 
+=======
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for _, k := range keys {
+		kvstore.Set(k, value)
+	}
+}
+
+>>>>>>> fred/allow_multiple_futures_for_sim
 func BenchmarkBlankParentIteratorNextKeySize32(b *testing.B) {
 	benchmarkBlankParentIteratorNext(b, 32)
 }
@@ -138,7 +165,10 @@ func BenchmarkBlankParentAppendKeySize32(b *testing.B) {
 func BenchmarkSetKeySize32(b *testing.B) {
 	benchmarkRandomSet(b, 32)
 }
+<<<<<<< HEAD
 
 func BenchmarkIteratorOnParentWith1MDeletes(b *testing.B) {
 	benchmarkIteratorOnParentWithManyDeletes(b, 1_000_000)
 }
+=======
+>>>>>>> fred/allow_multiple_futures_for_sim
