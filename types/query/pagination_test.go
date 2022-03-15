@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/stretchr/testify/suite"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
@@ -155,7 +157,7 @@ func (s *paginationTestSuite) TestPagination() {
 	s.T().Log("verify paginate with offset and key - error")
 	pageReq = &query.PageRequest{Key: res.Pagination.NextKey, Offset: 100, Limit: defaultLimit, CountTotal: false}
 	request = types.NewQueryAllBalancesRequest(addr1, pageReq)
-	res, err = queryClient.AllBalances(gocontext.Background(), request)
+	_, err = queryClient.AllBalances(gocontext.Background(), request)
 	s.Require().Error(err)
 	s.Require().Equal("rpc error: code = InvalidArgument desc = paginate: invalid request, either offset or key is expected, got both", err.Error())
 
@@ -340,7 +342,7 @@ func setupTest() (*simapp.SimApp, sdk.Context, codec.Codec) {
 	appCodec := app.AppCodec()
 
 	db := dbm.NewMemDB()
-	ms := store.NewCommitMultiStore(db)
+	ms := store.NewCommitMultiStore(db, log.NewNopLogger())
 
 	ms.LoadLatestVersion()
 
